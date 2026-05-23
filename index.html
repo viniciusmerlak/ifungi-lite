@@ -558,16 +558,109 @@ document.getElementById('inp-pass').addEventListener('keydown', function(e){
 document.getElementById('btn-logout').onclick = function(){ auth.signOut(); };
 
 // ═══════════════════════════════════════════════
+// REST HELPER — funciona em qualquer Android
+// Usa a API REST do RTDB em vez de WebSocket
+// ═══════════════════════════════════════════════
+var RTDB_URL = 'https://pfi-ifungi-default-rtdb.firebaseio.com';
+
+function rtdbGet(path, cb) {
+  auth.currentUser.getIdToken().then(function(token) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', RTDB_URL + path + '.json?auth=' + token, true);
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState !== 4) return;
+      if(xhr.status === 200) {
+        try { cb(null, JSON.parse(xhr.responseText)); }
+        catch(e) { cb(e, null); }
+      } else {
+        cb(new Error('HTTP ' + xhr.status), null);
+      }
+    };
+    xhr.send();
+  }).catch(function(e){ cb(e, null); });
+}
+
+function rtdbSet(path, data, cb) {
+  auth.currentUser.getIdToken().then(function(token) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('PUT', RTDB_URL + path + '.json?auth=' + token, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState !== 4) return;
+      if(xhr.status >= 200 && xhr.status < 300) { if(cb) cb(null); }
+      else { if(cb) cb(new Error('HTTP ' + xhr.status)); }
+    };
+    xhr.send(JSON.stringify(data));
+  }).catch(function(e){ if(cb) cb(e); });
+}
+
+function rtdbPatch(path, data, cb) {
+  auth.currentUser.getIdToken().then(function(token) {
+    var xhr = new XMLHttpRequest();
+    xhr.open('PATCH', RTDB_URL + path + '.json?auth=' + token, true);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onreadystatechange = function() {
+      if(xhr.readyState !== 4) return;
+      if(xhr.status >= 200 && xhr.status < 300) { if(cb) cb(null); }
+      else { if(cb) cb(new Error('HTTP ' + xhr.status)); }
+    };
+    xhr.send(JSON.stringify(data));
+  }).catch(function(e){ if(cb) cb(e); });
+}
+
+// ═══════════════════════════════════════════════
+// POLLING — substitui WebSocket (Android 4.1)
+// ═══════════════════════════════════════════════
+var _pollTimer = null;
+var POLL_MS = 8000; // atualiza a cada 8s
+
+function startPolling(id) {
+  stopPolling();
+  fetchGHData(id);
+  _pollTimer = setInterval(function(){ fetchGHData(id); }, POLL_MS);
+}
+
+function stopPolling() {
+  if(_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
+}
+
+function fetchGHData(id) {
+  rtdbGet('/greenhouses/' + id, function(err, data) {
+    if(err) {
+      dbg('RTDB err: ' + err.message);
+      show('no-conn');
+      return;
+    }
+    hide('no-conn');
+    hide('loader');
+    show('dashboard');
+    S.data = data || {};
+    renderAll(S.data);
+    dbg('OK ' + new Date().toLocaleTimeString());
+  });
+}
+
+// ═══════════════════════════════════════════════
+// DEBUG BAR (visível no celular para diagnóstico)
+// ═══════════════════════════════════════════════
+function dbg(msg) {
+  var el = document.getElementById('dbg-bar');
+  if(el) el.textContent = msg;
+}
+
+// ═══════════════════════════════════════════════
 // GREENHOUSES
 // ═══════════════════════════════════════════════
 function loadGreenhouses(){
-  db.ref('/Usuarios/'+S.uid+'/Estufas permitidas').on('value', function(snap){
-    var raw = snap.val();
+  dbg('Buscando estufas...');
+  rtdbGet('/Usuarios/' + S.uid + '/Estufas permitidas', function(err, raw) {
+    if(err){ dbg('Erro estufas: '+err.message); return; }
     var list = [];
     if(Array.isArray(raw)) list = raw.filter(function(v){ return typeof v==='string'&&v.length>0; });
     else if(typeof raw==='string'&&raw.length>0) list=[raw];
     else if(raw&&typeof raw==='object') list=Object.keys(raw).map(function(k){ return raw[k]; }).filter(function(v){ return typeof v==='string'&&v.length>0; });
 
+    dbg('Estufas: ' + list.join(', '));
     var sel = document.getElementById('sel-gh');
     sel.innerHTML = '';
     if(!list.length){
@@ -588,22 +681,11 @@ document.getElementById('sel-gh').onchange = function(){ selectGH(this.value); }
 function selectGH(id){
   if(!id) return;
   S.ghId = id;
+  stopPolling();
   unsub();
   hide('dashboard'); show('loader');
-
-  var ref1 = db.ref('/greenhouses/'+id);
-  var cb1 = ref1.on('value', function(snap){
-    hide('loader'); show('dashboard');
-    S.data = snap.val() || {};
-    renderAll(S.data);
-  });
-  S.unsubs.push(function(){ ref1.off('value', cb1); });
-
-  var ref2 = db.ref('.info/connected');
-  var cb2 = ref2.on('value', function(snap){
-    if(snap.val()) hide('no-conn'); else show('no-conn');
-  });
-  S.unsubs.push(function(){ ref2.off('value', cb2); });
+  dbg('Conectando: ' + id);
+  startPolling(id);
 }
 
 // ═══════════════════════════════════════════════
@@ -749,24 +831,28 @@ function updateLedIntRow(){
 }
 
 // ═══════════════════════════════════════════════
-// ACTIONS
+// ACTIONS — todas via REST (sem WebSocket)
 // ═══════════════════════════════════════════════
 function applyMode(modeId){
   if(!S.ghId) return;
   if(modeId===((S.data.operation_mode&&S.data.operation_mode.mode)||'manual')) return;
   var label=''; MODES.forEach(function(m){ if(m.id===modeId) label=m.label; });
-  db.ref('/greenhouses/'+S.ghId+'/operation_mode').update({
-    mode:modeId, lastChanged:Math.floor(Date.now()/1000), changedBy:'app'
-  }).then(function(){ toast('Modo "'+label+'" aplicado'); })
-    .catch(function(e){ toast('Erro: '+e.message,'err'); });
+  rtdbPatch('/greenhouses/'+S.ghId+'/operation_mode',
+    {mode:modeId, lastChanged:Math.floor(Date.now()/1000), changedBy:'app'},
+    function(err){
+      if(err) toast('Erro: '+err.message,'err');
+      else { toast('Modo "'+label+'" aplicado'); fetchGHData(S.ghId); }
+    }
+  );
 }
 
 document.getElementById('btn-debug').onclick = function(){
   if(!S.ghId) return;
   var d = !!S.data.debug_mode;
-  db.ref('/greenhouses/'+S.ghId+'/debug_mode').set(!d)
-    .then(function(){ toast(d?'Automatico ativado':'Manual ativado'); })
-    .catch(function(e){ toast('Erro: '+e.message,'err'); });
+  rtdbSet('/greenhouses/'+S.ghId+'/debug_mode', !d, function(err){
+    if(err) toast('Erro: '+err.message,'err');
+    else { toast(d?'Automatico ativado':'Manual ativado'); fetchGHData(S.ghId); }
+  });
 };
 
 // Manual dirty
@@ -789,10 +875,11 @@ document.getElementById('btn-apply-manual').onclick = function(){
     umidificador:gc('m-um'),
     leds:{ligado:gc('m-led'),intensity:parseInt(gv('m-led-int'),10)||0}
   };
-  db.ref('/greenhouses/'+S.ghId+'/manual_actuators').set(payload)
-    .then(function(){ toast('Atuadores enviados'); S.dbgDirty=false; })
-    .catch(function(e){ toast('Erro: '+e.message,'err'); })
-    .then(function(){ btn.disabled=false; btn.textContent='Aplicar atuadores'; });
+  rtdbSet('/greenhouses/'+S.ghId+'/manual_actuators', payload, function(err){
+    if(err) toast('Erro: '+err.message,'err');
+    else { toast('Atuadores enviados'); S.dbgDirty=false; fetchGHData(S.ghId); }
+    btn.disabled=false; btn.textContent='Aplicar atuadores';
+  });
 };
 
 // Setpoints dirty
@@ -816,9 +903,10 @@ document.getElementById('btn-save-sp').onclick = function(){
     coSp:clampI(gv('sp-coSp'),0,500,50),
     tvocsSp:clampI(gv('sp-tvocsSp'),0,1000,100),
     lux:clampI(gv('sp-lux'),0,4095,5000)};
-  db.ref('/greenhouses/'+S.ghId+'/setpoints').update(payload)
-    .then(function(){ toast('Setpoints salvos'); S.spDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar setpoints'; },2000); })
-    .catch(function(e){ toast('Erro: '+e.message,'err'); btn.disabled=false; btn.textContent='Salvar setpoints'; });
+  rtdbPatch('/greenhouses/'+S.ghId+'/setpoints', payload, function(err){
+    if(err){ toast('Erro: '+err.message,'err'); btn.disabled=false; btn.textContent='Salvar setpoints'; }
+    else { toast('Setpoints salvos'); S.spDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar setpoints'; },2000); }
+  });
 };
 
 // LED dirty
@@ -849,9 +937,10 @@ document.getElementById('btn-save-led').onclick = function(){
     onHour:onH,onMinute:onM,offHour:offH,offMinute:offM,
     intensity:clampI(gv('led-sched-int'),0,255,255)
   };
-  db.ref('/greenhouses/'+S.ghId+'/led_schedule').set(payload)
-    .then(function(){ toast('Agendamento salvo'); S.ledDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar agendamento'; },2000); })
-    .catch(function(e){ toast('Erro: '+e.message,'err'); btn.disabled=false; btn.textContent='Salvar agendamento'; });
+  rtdbSet('/greenhouses/'+S.ghId+'/led_schedule', payload, function(err){
+    if(err){ toast('Erro: '+err.message,'err'); btn.disabled=false; btn.textContent='Salvar agendamento'; }
+    else { toast('Agendamento salvo'); S.ledDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar agendamento'; },2000); }
+  });
 };
 </script>
 </body>
