@@ -4,310 +4,408 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
 <title>IFungi Lite</title>
+<!-- Fonte segura para Android antigo -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap">
 <style>
-  /* ── RESET & BASE ─────────────────────────────────────────── */
-  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-  :root{
-    --bg:#0d1117;
-    --bg2:#161b22;
-    --bg3:#21262d;
-    --border:#30363d;
-    --text:#e6edf3;
-    --text2:#8b949e;
-    --green:#3fb950;
-    --yellow:#d29922;
-    --red:#f85149;
-    --blue:#58a6ff;
-    --teal:#39d353;
-    --accent:#1f6feb;
-    --r:10px;
-    --font:'B612 Mono',monospace;
-  }
-  html,body{
-    height:100%;
-    background:var(--bg);
-    color:var(--text);
-    font-family:var(--font);
-    font-size:13px;
-    overflow-x:hidden;
-  }
+/* Sem CSS variables — compatível com Android 4.1 WebView */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  /* ── LAYOUT ───────────────────────────────────────────────── */
-  #app{min-height:100%;display:flex;flex-direction:column}
+html,body{
+  height:100%;
+  background-color:#0d1117;
+  color:#e6edf3;
+  font-family:'Share Tech Mono',Courier,monospace;
+  font-size:13px;
+  overflow-x:hidden;
+}
 
-  header{
-    display:flex;align-items:center;justify-content:space-between;
-    padding:10px 12px;
-    background:var(--bg2);
-    border-bottom:1px solid var(--border);
-    position:sticky;top:0;z-index:99;
-  }
-  .brand{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700;letter-spacing:.04em}
-  .brand svg{width:28px;height:28px}
-  .brand span{color:var(--teal)}
-  #btn-logout{
-    background:none;border:1px solid var(--border);color:var(--text2);
-    padding:5px 10px;border-radius:6px;cursor:pointer;font-family:var(--font);font-size:11px;
-  }
-  #btn-logout:active{background:var(--bg3)}
+/* ── LOGIN ─────────────────────────────────────────────── */
+#login-screen{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  -webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;
+  min-height:100%;
+  padding:28px 20px;
+  gap:12px;
+  background-color:#0d1117;
+}
+.login-logo{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:10px;font-size:22px;font-weight:bold;margin-bottom:12px;
+}
+.login-logo svg{width:36px;height:36px}
+.login-sub{color:#8b949e;font-size:11px;margin-top:-8px;margin-bottom:8px}
+#login-screen input{
+  width:100%;max-width:320px;
+  padding:11px 12px;
+  border-radius:8px;
+  border:1px solid #30363d;
+  background-color:#161b22;
+  color:#e6edf3;
+  font-family:'Share Tech Mono',Courier,monospace;
+  font-size:14px;
+  outline:none;
+}
+#login-screen input:focus{border-color:#58a6ff}
+#btn-login{
+  width:100%;max-width:320px;
+  padding:12px;
+  border-radius:8px;
+  background-color:#1f6feb;
+  border:none;
+  color:#ffffff;
+  font-family:'Share Tech Mono',Courier,monospace;
+  font-size:14px;
+  font-weight:bold;
+  cursor:pointer;
+  margin-top:4px;
+}
+#btn-login:active{background-color:#388bfd}
+#login-err{color:#f85149;font-size:11px;min-height:18px;text-align:center;max-width:320px}
+#login-loading{color:#8b949e;font-size:11px;text-align:center;min-height:18px}
 
-  main{flex:1;padding:10px;display:flex;flex-direction:column;gap:10px}
+/* ── APP SHELL ─────────────────────────────────────────── */
+#app{
+  display:none;
+  -webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;
+  min-height:100%;
+  background-color:#0d1117;
+}
+#app.visible{display:-webkit-box;display:-webkit-flex;display:flex}
 
-  /* ── CARDS ────────────────────────────────────────────────── */
-  .card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:10px}
-  .card-title{
-    font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
-    color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:5px
-  }
+header{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  -webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;
+  padding:10px 12px;
+  background-color:#161b22;
+  border-bottom:1px solid #30363d;
+  position:-webkit-sticky;position:sticky;
+  top:0;z-index:99;
+}
+.h-brand{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:8px;font-size:16px;font-weight:bold;
+}
+.h-brand svg{width:26px;height:26px}
+.teal{color:#39d353}
+#btn-logout{
+  padding:6px 12px;
+  border-radius:6px;
+  border:1px solid #30363d;
+  background-color:#21262d;
+  color:#8b949e;
+  font-family:'Share Tech Mono',Courier,monospace;
+  font-size:11px;
+  cursor:pointer;
+}
+#btn-logout:active{background-color:#30363d}
 
-  /* ── STATUS BAR ───────────────────────────────────────────── */
-  #status-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-  .pill{
-    display:inline-flex;align-items:center;gap:4px;
-    padding:3px 8px;border-radius:20px;font-size:11px;
-    background:var(--bg3);border:1px solid var(--border);
-  }
-  .pill.online{border-color:var(--green);color:var(--green)}
-  .pill.offline{border-color:var(--red);color:var(--red)}
-  .dot{width:7px;height:7px;border-radius:50%;background:currentColor}
+main{
+  -webkit-box-flex:1;-webkit-flex:1;flex:1;
+  padding:10px;
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;
+  gap:10px;
+}
 
-  /* ── SENSOR GRID ──────────────────────────────────────────── */
-  #sensor-grid{
-    display:grid;
-    grid-template-columns:repeat(2,1fr);
-    gap:8px;
-  }
-  .s-card{
-    background:var(--bg3);border:1px solid var(--border);border-radius:8px;
-    padding:8px 10px;display:flex;flex-direction:column;gap:2px;
-    transition:border-color .2s;
-  }
-  .s-card.warn{border-color:var(--yellow)}
-  .s-card.err{border-color:var(--red)}
-  .s-label{font-size:10px;color:var(--text2);letter-spacing:.05em;text-transform:uppercase}
-  .s-val{font-size:22px;font-weight:700;line-height:1.1;letter-spacing:-.02em}
-  .s-unit{font-size:11px;color:var(--text2);margin-left:2px}
-  .s-badge{font-size:9px;margin-top:2px}
-  .s-badge.ok{color:var(--green)}
-  .s-badge.warn{color:var(--yellow)}
-  .s-badge.err{color:var(--red)}
+/* ── CARDS ─────────────────────────────────────────────── */
+.card{
+  background-color:#161b22;
+  border:1px solid #30363d;
+  border-radius:10px;
+  padding:11px;
+}
+.card-title{
+  font-size:10px;font-weight:bold;
+  letter-spacing:.08em;text-transform:uppercase;
+  color:#8b949e;margin-bottom:9px;
+}
 
-  /* ── ACTUATOR ROW ─────────────────────────────────────────── */
-  #actuator-row{display:flex;flex-wrap:wrap;gap:6px}
-  .act-pill{
-    display:inline-flex;align-items:center;gap:4px;
-    padding:4px 9px;border-radius:20px;font-size:11px;
-    background:var(--bg3);border:1px solid var(--border);color:var(--text2);
-  }
-  .act-pill.on{border-color:var(--green);color:var(--green);background:#0d2818}
-  .act-pill .dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+/* ── STATUS ────────────────────────────────────────────── */
+#status-bar{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;gap:6px;
+}
+.pill{
+  display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:4px;padding:3px 8px;border-radius:20px;font-size:11px;
+  background-color:#21262d;border:1px solid #30363d;color:#8b949e;
+}
+.pill-on{border-color:#3fb950;color:#3fb950}
+.pill-off{border-color:#f85149;color:#f85149}
+.pill-warn{border-color:#d29922;color:#d29922}
+.dot{width:7px;height:7px;border-radius:50%;background-color:currentColor;display:inline-block}
 
-  /* ── MODE BUTTONS ─────────────────────────────────────────── */
-  #mode-grid{display:flex;flex-wrap:wrap;gap:6px}
-  .mode-btn{
-    flex:1;min-width:80px;padding:7px 4px;border-radius:8px;
-    background:var(--bg3);border:1px solid var(--border);
-    color:var(--text2);font-family:var(--font);font-size:11px;cursor:pointer;
-    text-align:center;transition:background .15s,border-color .15s,color .15s;
-  }
-  .mode-btn.active{background:var(--accent);border-color:var(--blue);color:#fff}
-  .mode-btn:active{opacity:.7}
-  .mode-hint{font-size:10px;color:var(--text2);margin-top:6px;line-height:1.4}
+/* ── SENSOR GRID ───────────────────────────────────────── */
+#sensor-grid{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;
+  gap:8px;
+}
+.s-card{
+  background-color:#21262d;
+  border:1px solid #30363d;
+  border-radius:8px;
+  padding:8px 10px;
+  width:-webkit-calc(50% - 4px);width:calc(50% - 4px);
+  min-width:120px;
+}
+.s-card-warn{border-color:#d29922}
+.s-card-err{border-color:#f85149}
+.s-label{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.05em;margin-bottom:2px}
+.s-val{font-size:22px;font-weight:bold;line-height:1.1;color:#e6edf3}
+.s-unit{font-size:11px;color:#8b949e;margin-left:2px}
+.s-badge{font-size:9px;margin-top:3px}
+.badge-ok{color:#3fb950}
+.badge-warn{color:#d29922}
+.badge-err{color:#f85149}
 
-  /* ── MANUAL PANEL ─────────────────────────────────────────── */
-  #debug-toggle{
-    display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;
-  }
-  #btn-debug{
-    padding:6px 12px;border-radius:6px;border:1px solid var(--border);
-    background:var(--bg3);color:var(--text);font-family:var(--font);font-size:11px;cursor:pointer;
-  }
-  #btn-debug.active{background:var(--yellow);border-color:var(--yellow);color:#000}
-  #manual-panel{display:none;flex-direction:column;gap:8px}
-  #manual-panel.visible{display:flex}
-  .chk-row{display:flex;align-items:center;gap:8px;font-size:12px}
-  .chk-row input[type=checkbox]{width:16px;height:16px;accent-color:var(--teal)}
-  #led-intensity-row{display:flex;flex-direction:column;gap:4px;font-size:11px}
-  #led-intensity-row input[type=range]{width:100%;accent-color:var(--teal)}
-  #btn-apply-manual{
-    padding:8px;border-radius:7px;background:var(--accent);border:none;
-    color:#fff;font-family:var(--font);font-size:12px;font-weight:700;cursor:pointer;
-    margin-top:4px;
-  }
-  #btn-apply-manual:disabled{opacity:.5}
+/* ── ACTUATORS ─────────────────────────────────────────── */
+#actuator-row{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;gap:6px;
+}
+.act-pill{
+  display:-webkit-inline-box;display:-webkit-inline-flex;display:inline-flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:4px;padding:4px 9px;border-radius:20px;font-size:11px;
+  background-color:#21262d;border:1px solid #30363d;color:#8b949e;
+}
+.act-on{border-color:#3fb950;color:#3fb950;background-color:#0d2818}
 
-  /* ── SETPOINTS ────────────────────────────────────────────── */
-  #sp-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  .sp-row{display:flex;flex-direction:column;gap:3px}
-  .sp-row label{font-size:10px;color:var(--text2);text-transform:uppercase;letter-spacing:.05em}
-  .sp-row-inner{display:flex;align-items:center;gap:4px}
-  .sp-row input[type=number]{
-    flex:1;padding:5px 6px;border-radius:6px;border:1px solid var(--border);
-    background:var(--bg3);color:var(--text);font-family:var(--font);font-size:13px;
-    -moz-appearance:textfield;
-  }
-  .sp-row input::-webkit-inner-spin-button,.sp-row input::-webkit-outer-spin-button{-webkit-appearance:none}
-  .sp-unit{font-size:10px;color:var(--text2);min-width:24px}
-  #btn-save-sp{
-    margin-top:8px;width:100%;padding:8px;border-radius:7px;
-    background:var(--bg3);border:1px solid var(--border);
-    color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;
-  }
-  #btn-save-sp.dirty{background:var(--accent);border-color:var(--blue);color:#fff}
-  #btn-save-sp:disabled{opacity:.5}
+/* ── MODE GRID ─────────────────────────────────────────── */
+#mode-grid{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;gap:6px;
+  margin-bottom:8px;
+}
+.mode-btn{
+  -webkit-box-flex:1;-webkit-flex:1;flex:1;
+  min-width:80px;padding:8px 4px;
+  border-radius:8px;
+  background-color:#21262d;border:1px solid #30363d;
+  color:#8b949e;
+  font-family:'Share Tech Mono',Courier,monospace;
+  font-size:11px;cursor:pointer;text-align:center;
+}
+.mode-btn-active{background-color:#1f6feb;border-color:#58a6ff;color:#ffffff}
+.mode-btn:active{opacity:.7}
+.mode-hint{font-size:10px;color:#8b949e;line-height:1.5}
 
-  /* ── LED SCHEDULE ─────────────────────────────────────────── */
-  .led-checks{display:flex;flex-direction:column;gap:6px;margin-bottom:8px}
-  .time-row{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:4px}
-  .time-row input[type=number]{
-    width:44px;padding:5px;border-radius:6px;border:1px solid var(--border);
-    background:var(--bg3);color:var(--text);font-family:var(--font);font-size:13px;
-    text-align:center;-moz-appearance:textfield;
-  }
-  .time-row input::-webkit-inner-spin-button,.time-row input::-webkit-outer-spin-button{-webkit-appearance:none}
-  #btn-save-led{
-    width:100%;padding:8px;border-radius:7px;
-    background:var(--bg3);border:1px solid var(--border);
-    color:var(--text);font-family:var(--font);font-size:12px;cursor:pointer;
-    margin-top:6px;
-  }
-  #btn-save-led.dirty{background:var(--accent);border-color:var(--blue);color:#fff}
+/* ── MANUAL PANEL ──────────────────────────────────────── */
+.debug-row{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  -webkit-box-pack:justify;-webkit-justify-content:space-between;justify-content:space-between;
+  margin-bottom:10px;
+}
+#btn-debug{
+  padding:6px 12px;border-radius:6px;
+  border:1px solid #30363d;background-color:#21262d;
+  color:#e6edf3;font-family:'Share Tech Mono',Courier,monospace;font-size:11px;cursor:pointer;
+}
+#btn-debug.dbg-active{background-color:#d29922;border-color:#d29922;color:#000000}
+#manual-panel{display:none;-webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;gap:8px}
+#manual-panel.mpvis{display:-webkit-box;display:-webkit-flex;display:flex}
+.chk-row{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:8px;font-size:12px;color:#e6edf3;
+}
+.chk-row input[type=checkbox]{width:18px;height:18px;accent-color:#39d353}
+.manual-warn{font-size:10px;color:#d29922;margin-bottom:4px}
+#led-intensity-row{display:none;-webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;gap:4px;font-size:11px}
+#led-intensity-row.livis{display:-webkit-box;display:-webkit-flex;display:flex}
+#led-intensity-row input[type=range]{width:100%;accent-color:#39d353}
+#btn-apply-manual{
+  padding:9px;border-radius:7px;
+  background-color:#1f6feb;border:none;
+  color:#ffffff;font-family:'Share Tech Mono',Courier,monospace;
+  font-size:12px;font-weight:bold;cursor:pointer;margin-top:4px;
+}
+#btn-apply-manual:disabled{opacity:.5}
+#btn-apply-manual:active{background-color:#388bfd}
 
-  /* ── TOAST ────────────────────────────────────────────────── */
-  #toast{
-    position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(60px);
-    background:var(--bg3);border:1px solid var(--border);color:var(--text);
-    padding:8px 18px;border-radius:20px;font-size:12px;
-    transition:transform .25s,opacity .25s;opacity:0;z-index:999;white-space:nowrap;
-  }
-  #toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-  #toast.ok{border-color:var(--green);color:var(--green)}
-  #toast.err{border-color:var(--red);color:var(--red)}
+/* ── SETPOINTS ─────────────────────────────────────────── */
+#sp-grid{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-flex-wrap:wrap;flex-wrap:wrap;gap:8px;
+}
+.sp-row{
+  width:-webkit-calc(50% - 4px);width:calc(50% - 4px);
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;gap:3px;
+}
+.sp-row label{font-size:10px;color:#8b949e;text-transform:uppercase;letter-spacing:.04em}
+.sp-inner{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;gap:4px;
+}
+.sp-row input[type=number]{
+  -webkit-box-flex:1;-webkit-flex:1;flex:1;
+  padding:6px;border-radius:6px;
+  border:1px solid #30363d;background-color:#21262d;
+  color:#e6edf3;font-family:'Share Tech Mono',Courier,monospace;font-size:13px;
+  -moz-appearance:textfield;
+}
+.sp-row input::-webkit-inner-spin-button,.sp-row input::-webkit-outer-spin-button{-webkit-appearance:none}
+.sp-row input:focus{outline:none;border-color:#58a6ff}
+.sp-unit{font-size:10px;color:#8b949e;min-width:26px}
+.save-btn{
+  margin-top:8px;width:100%;padding:9px;border-radius:7px;
+  background-color:#21262d;border:1px solid #30363d;
+  color:#8b949e;font-family:'Share Tech Mono',Courier,monospace;font-size:12px;cursor:pointer;
+}
+.save-btn.dirty{background-color:#1f6feb;border-color:#58a6ff;color:#ffffff}
+.save-btn:disabled{opacity:.5}
+.save-btn:active{opacity:.7}
 
-  /* ── LOGIN ────────────────────────────────────────────────── */
-  #login-screen{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    min-height:100vh;gap:14px;padding:24px;
-  }
-  #login-screen .brand{font-size:22px;margin-bottom:8px}
-  #login-screen input{
-    width:100%;padding:10px 12px;border-radius:8px;border:1px solid var(--border);
-    background:var(--bg2);color:var(--text);font-family:var(--font);font-size:14px;
-  }
-  #login-screen input:focus{outline:none;border-color:var(--blue)}
-  #btn-login{
-    width:100%;padding:11px;border-radius:8px;background:var(--accent);border:none;
-    color:#fff;font-family:var(--font);font-size:14px;font-weight:700;cursor:pointer;
-  }
-  #login-err{color:var(--red);font-size:11px;min-height:16px;text-align:center}
+/* ── LED SCHEDULE ──────────────────────────────────────── */
+.led-checks{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-orient:vertical;-webkit-flex-direction:column;flex-direction:column;gap:7px;margin-bottom:9px}
+.time-row{
+  display:-webkit-box;display:-webkit-flex;display:flex;
+  -webkit-box-align:center;-webkit-align-items:center;align-items:center;
+  gap:5px;font-size:12px;color:#e6edf3;margin-bottom:4px;
+}
+.time-row span{min-width:54px}
+.time-row input[type=number]{
+  width:46px;padding:6px 4px;text-align:center;
+  border-radius:6px;border:1px solid #30363d;
+  background-color:#21262d;color:#e6edf3;
+  font-family:'Share Tech Mono',Courier,monospace;font-size:13px;
+  -moz-appearance:textfield;
+}
+.time-row input::-webkit-inner-spin-button,.time-row input::-webkit-outer-spin-button{-webkit-appearance:none}
+.time-row input:focus{outline:none;border-color:#58a6ff}
+#led-int-sched-row{display:none;font-size:11px;margin-top:6px;color:#e6edf3}
+#led-int-sched-row.livis{display:block}
+#led-int-sched-row input[type=range]{width:100%;accent-color:#39d353;margin-top:4px}
 
-  /* ── MISC ─────────────────────────────────────────────────── */
-  .section-hidden{display:none!important}
-  .loader{text-align:center;padding:20px;color:var(--text2);font-size:12px}
-  .no-conn{
-    background:#1a0f00;border:1px solid var(--yellow);color:var(--yellow);
-    border-radius:var(--r);padding:8px 12px;font-size:11px;
-  }
-  select{
-    padding:5px 8px;border-radius:6px;border:1px solid var(--border);
-    background:var(--bg3);color:var(--text);font-family:var(--font);font-size:12px;
-    width:100%;
-  }
+/* ── MISC ──────────────────────────────────────────────── */
+.hidden{display:none!important}
+.loader{text-align:center;padding:22px;color:#8b949e;font-size:12px}
+.no-conn{
+  background-color:#1a1000;border:1px solid #d29922;color:#d29922;
+  border-radius:10px;padding:8px 12px;font-size:11px;
+}
+select{
+  width:100%;padding:8px;border-radius:7px;
+  border:1px solid #30363d;background-color:#21262d;
+  color:#e6edf3;font-family:'Share Tech Mono',Courier,monospace;font-size:12px;
+}
+select:focus{outline:none;border-color:#58a6ff}
+
+/* ── TOAST ─────────────────────────────────────────────── */
+#toast{
+  position:fixed;bottom:16px;left:50%;
+  -webkit-transform:translateX(-50%) translateY(60px);transform:translateX(-50%) translateY(60px);
+  background-color:#21262d;border:1px solid #30363d;color:#e6edf3;
+  padding:8px 18px;border-radius:20px;font-size:12px;
+  -webkit-transition:-webkit-transform .25s,opacity .25s;transition:transform .25s,opacity .25s;
+  opacity:0;z-index:999;white-space:nowrap;
+}
+#toast.tshow{-webkit-transform:translateX(-50%) translateY(0);transform:translateX(-50%) translateY(0);opacity:1}
+#toast.tok{border-color:#3fb950;color:#3fb950}
+#toast.terr{border-color:#f85149;color:#f85149}
 </style>
 </head>
 <body>
 
-<!-- ══ LOGIN ══════════════════════════════════════════════════ -->
+<!-- LOGIN -->
 <div id="login-screen">
-  <div class="brand">
+  <div class="login-logo">
     <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="16" cy="16" r="15" fill="#161b22" stroke="#30363d"/>
-      <ellipse cx="16" cy="20" rx="9" ry="5" fill="#3fb950" opacity=".25"/>
-      <rect x="15" y="14" width="2" height="8" rx="1" fill="#3fb950"/>
-      <ellipse cx="16" cy="13" rx="7" ry="5" fill="#3fb950"/>
-      <ellipse cx="11" cy="15" rx="4" ry="3" fill="#39d353" opacity=".7" transform="rotate(-20 11 15)"/>
-      <ellipse cx="21" cy="15" rx="4" ry="3" fill="#39d353" opacity=".7" transform="rotate(20 21 15)"/>
+      <ellipse cx="16" cy="21" rx="9" ry="4" fill="#3fb950" opacity=".2"/>
+      <rect x="15" y="15" width="2" height="7" rx="1" fill="#3fb950"/>
+      <ellipse cx="16" cy="14" rx="7" ry="5" fill="#3fb950"/>
+      <ellipse cx="10" cy="16" rx="4" ry="3" fill="#39d353" opacity=".65" transform="rotate(-20 10 16)"/>
+      <ellipse cx="22" cy="16" rx="4" ry="3" fill="#39d353" opacity=".65" transform="rotate(20 22 16)"/>
     </svg>
-    <span>IFungi <span style="color:var(--text2);font-size:12px">Lite</span></span>
+    IFungi <span class="teal">&nbsp;Lite</span>
   </div>
+  <div class="login-sub">Greenhouse Controller</div>
   <input type="email" id="inp-email" placeholder="E-mail" autocomplete="username"/>
   <input type="password" id="inp-pass" placeholder="Senha" autocomplete="current-password"/>
   <button id="btn-login">Entrar</button>
+  <div id="login-loading"></div>
   <div id="login-err"></div>
 </div>
 
-<!-- ══ APP ════════════════════════════════════════════════════ -->
-<div id="app" class="section-hidden">
+<!-- APP -->
+<div id="app">
   <header>
-    <div class="brand">
+    <div class="h-brand">
       <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <ellipse cx="16" cy="20" rx="9" ry="5" fill="#3fb950" opacity=".25"/>
-        <rect x="15" y="14" width="2" height="8" rx="1" fill="#3fb950"/>
-        <ellipse cx="16" cy="13" rx="7" ry="5" fill="#3fb950"/>
-        <ellipse cx="11" cy="15" rx="4" ry="3" fill="#39d353" opacity=".7" transform="rotate(-20 11 15)"/>
-        <ellipse cx="21" cy="15" rx="4" ry="3" fill="#39d353" opacity=".7" transform="rotate(20 21 15)"/>
+        <ellipse cx="16" cy="21" rx="9" ry="4" fill="#3fb950" opacity=".2"/>
+        <rect x="15" y="15" width="2" height="7" rx="1" fill="#3fb950"/>
+        <ellipse cx="16" cy="14" rx="7" ry="5" fill="#3fb950"/>
+        <ellipse cx="10" cy="16" rx="4" ry="3" fill="#39d353" opacity=".65" transform="rotate(-20 10 16)"/>
+        <ellipse cx="22" cy="16" rx="4" ry="3" fill="#39d353" opacity=".65" transform="rotate(20 22 16)"/>
       </svg>
-      <span>IFungi<span style="color:var(--teal)">.</span></span>
+      IFungi<span class="teal">.</span>
     </div>
     <button id="btn-logout">Sair</button>
   </header>
 
   <main>
-    <div id="no-conn" class="no-conn section-hidden">⚠ Sem conexão com Firebase RTDB</div>
+    <div id="no-conn" class="no-conn hidden">&#9888; Sem conexao com Firebase RTDB</div>
 
-    <!-- Seletor de estufa -->
+    <!-- Estufa -->
     <div class="card">
-      <div class="card-title">🌿 Estufa</div>
-      <select id="sel-greenhouse"><option value="">Carregando...</option></select>
+      <div class="card-title">Estufa</div>
+      <select id="sel-gh"><option value="">Carregando...</option></select>
     </div>
 
-    <div id="loader" class="loader section-hidden">Carregando dados...</div>
+    <div id="loader" class="loader hidden">Carregando dados...</div>
 
-    <div id="dashboard" class="section-hidden">
+    <div id="dashboard" class="hidden">
 
-      <!-- Status bar -->
-      <div class="card" id="card-status">
+      <!-- Status -->
+      <div class="card" style="margin-bottom:10px">
         <div id="status-bar"></div>
       </div>
 
       <!-- Sensores -->
-      <div class="card">
-        <div class="card-title">📡 Sensores</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Sensores</div>
         <div id="sensor-grid"></div>
       </div>
 
       <!-- Atuadores -->
-      <div class="card">
-        <div class="card-title">⚡ Atuadores</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Atuadores</div>
         <div id="actuator-row"></div>
       </div>
 
-      <!-- Modo de operação -->
-      <div class="card">
-        <div class="card-title">🔄 Modo de operação</div>
+      <!-- Modo -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Modo de Operacao</div>
         <div id="mode-grid"></div>
         <div class="mode-hint" id="mode-hint"></div>
       </div>
 
-      <!-- Controle manual -->
-      <div class="card">
-        <div id="debug-toggle">
-          <span style="font-size:11px;color:var(--text2)">Controle manual</span>
-          <button id="btn-debug">Automático</button>
+      <!-- Manual -->
+      <div class="card" style="margin-bottom:10px">
+        <div class="debug-row">
+          <span style="font-size:11px;color:#8b949e">Controle manual</span>
+          <button id="btn-debug">Automatico</button>
         </div>
         <div id="manual-panel">
-          <div style="font-size:10px;color:var(--yellow);margin-bottom:4px">
-            ⚠ Modo manual ativo — ESP32 aplicará estes valores
-          </div>
-          <label class="chk-row"><input type="checkbox" id="m-r1"> Relé 1 — Peltier</label>
-          <label class="chk-row"><input type="checkbox" id="m-r2"> Relé 2 — Polaridade</label>
-          <label class="chk-row"><input type="checkbox" id="m-r3"> Relé 3 — Umidificador</label>
-          <label class="chk-row"><input type="checkbox" id="m-r4"> Relé 4 — Exaustor</label>
+          <div class="manual-warn">&#9888; Modo manual — ESP32 aplicara estes valores</div>
+          <label class="chk-row"><input type="checkbox" id="m-r1"> Rele 1 &mdash; Peltier</label>
+          <label class="chk-row"><input type="checkbox" id="m-r2"> Rele 2 &mdash; Polaridade</label>
+          <label class="chk-row"><input type="checkbox" id="m-r3"> Rele 3 &mdash; Umidificador</label>
+          <label class="chk-row"><input type="checkbox" id="m-r4"> Rele 4 &mdash; Exaustor</label>
           <label class="chk-row"><input type="checkbox" id="m-um"> Umidificador</label>
           <label class="chk-row"><input type="checkbox" id="m-led"> LEDs</label>
-          <div id="led-intensity-row" class="section-hidden">
+          <div id="led-intensity-row">
             <span>Intensidade LEDs: <span id="led-int-val">255</span>/255</span>
             <input type="range" id="m-led-int" min="0" max="255" value="255">
           </div>
@@ -316,43 +414,35 @@
       </div>
 
       <!-- Setpoints -->
-      <div class="card">
-        <div class="card-title">🎯 Setpoints</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Setpoints</div>
         <div id="sp-grid">
-          <div class="sp-row"><label>Temp. Mín</label><div class="sp-row-inner"><input type="number" id="sp-tMin" min="0" max="40" step="0.5"><span class="sp-unit">°C</span></div></div>
-          <div class="sp-row"><label>Temp. Máx</label><div class="sp-row-inner"><input type="number" id="sp-tMax" min="0" max="50" step="0.5"><span class="sp-unit">°C</span></div></div>
-          <div class="sp-row"><label>Umid. Mín</label><div class="sp-row-inner"><input type="number" id="sp-uMin" min="0" max="100"><span class="sp-unit">%</span></div></div>
-          <div class="sp-row"><label>Umid. Máx</label><div class="sp-row-inner"><input type="number" id="sp-uMax" min="0" max="100"><span class="sp-unit">%</span></div></div>
-          <div class="sp-row"><label>CO₂ Máx</label><div class="sp-row-inner"><input type="number" id="sp-co2Sp" min="100" max="5000" step="50"><span class="sp-unit">ppm</span></div></div>
-          <div class="sp-row"><label>CO Máx</label><div class="sp-row-inner"><input type="number" id="sp-coSp" min="0" max="500" step="5"><span class="sp-unit">ppm</span></div></div>
-          <div class="sp-row"><label>TVOCs Máx</label><div class="sp-row-inner"><input type="number" id="sp-tvocsSp" min="0" max="1000" step="10"><span class="sp-unit">ppb</span></div></div>
-          <div class="sp-row"><label>Lux Mín</label><div class="sp-row-inner"><input type="number" id="sp-lux" min="0" max="4095" step="50"><span class="sp-unit">lux</span></div></div>
+          <div class="sp-row"><label>Temp. Min</label><div class="sp-inner"><input type="number" id="sp-tMin" min="0" max="40" step="0.5"><span class="sp-unit">°C</span></div></div>
+          <div class="sp-row"><label>Temp. Max</label><div class="sp-inner"><input type="number" id="sp-tMax" min="0" max="50" step="0.5"><span class="sp-unit">°C</span></div></div>
+          <div class="sp-row"><label>Umid. Min</label><div class="sp-inner"><input type="number" id="sp-uMin" min="0" max="100"><span class="sp-unit">%</span></div></div>
+          <div class="sp-row"><label>Umid. Max</label><div class="sp-inner"><input type="number" id="sp-uMax" min="0" max="100"><span class="sp-unit">%</span></div></div>
+          <div class="sp-row"><label>CO2 Max</label><div class="sp-inner"><input type="number" id="sp-co2Sp" min="100" max="5000" step="50"><span class="sp-unit">ppm</span></div></div>
+          <div class="sp-row"><label>CO Max</label><div class="sp-inner"><input type="number" id="sp-coSp" min="0" max="500" step="5"><span class="sp-unit">ppm</span></div></div>
+          <div class="sp-row"><label>TVOCs Max</label><div class="sp-inner"><input type="number" id="sp-tvocsSp" min="0" max="1000" step="10"><span class="sp-unit">ppb</span></div></div>
+          <div class="sp-row"><label>Lux Min</label><div class="sp-inner"><input type="number" id="sp-lux" min="0" max="4095" step="50"><span class="sp-unit">lux</span></div></div>
         </div>
-        <button id="btn-save-sp" disabled>Salvar setpoints</button>
+        <button class="save-btn" id="btn-save-sp" disabled>Salvar setpoints</button>
       </div>
 
       <!-- LED Schedule -->
-      <div class="card">
-        <div class="card-title">💡 Agendamento LEDs</div>
+      <div class="card" style="margin-bottom:10px">
+        <div class="card-title">Agendamento LEDs</div>
         <div class="led-checks">
           <label class="chk-row"><input type="checkbox" id="led-sched"> Timer fixo</label>
-          <label class="chk-row"><input type="checkbox" id="led-solar"> Simulação solar</label>
+          <label class="chk-row"><input type="checkbox" id="led-solar"> Simulacao solar</label>
         </div>
-        <div class="time-row">
-          <span style="min-width:52px">Ligar:</span>
-          <input type="number" id="led-onH" min="0" max="23" value="6">h
-          <input type="number" id="led-onM" min="0" max="59" value="0">min
+        <div class="time-row"><span>Ligar:</span><input type="number" id="led-onH" min="0" max="23" value="6">h<input type="number" id="led-onM" min="0" max="59" value="0">min</div>
+        <div class="time-row"><span>Desligar:</span><input type="number" id="led-offH" min="0" max="23" value="20">h<input type="number" id="led-offM" min="0" max="59" value="0">min</div>
+        <div id="led-int-sched-row">
+          Intensidade: <span id="led-sched-int-val">255</span>/255
+          <input type="range" id="led-sched-int" min="0" max="255" value="255">
         </div>
-        <div class="time-row">
-          <span style="min-width:52px">Desligar:</span>
-          <input type="number" id="led-offH" min="0" max="23" value="20">h
-          <input type="number" id="led-offM" min="0" max="59" value="0">min
-        </div>
-        <div id="led-int-sched-row" class="section-hidden" style="margin-top:6px;font-size:11px">
-          Intensidade: <span id="led-sched-int-val">255</span>/255<br>
-          <input type="range" id="led-sched-int" min="0" max="255" value="255" style="width:100%;accent-color:var(--teal)">
-        </div>
-        <button id="btn-save-led" disabled>Salvar agendamento</button>
+        <button class="save-btn" id="btn-save-led" disabled>Salvar agendamento</button>
       </div>
 
     </div><!-- /dashboard -->
@@ -361,443 +451,408 @@
 
 <div id="toast"></div>
 
-<!-- ══ FIREBASE SDK (compat — menor e mais simples para dispositivos antigos) ══ -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<!-- Firebase SDK v8 — máxima compatibilidade com Android 4.x / WebView antigo -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 <script>
-// ════════════════════════════════════════════════════════
-// CONFIGURAÇÃO — edite conforme seu projeto Firebase
-// ════════════════════════════════════════════════════════
-const FB_CONFIG = {
+// ═══════════════════════════════════════════════
+// CONFIGURAÇÃO FIREBASE
+// ═══════════════════════════════════════════════
+var FB_CONFIG = {
   apiKey:            'AIzaSyCqq0lkiPq8vcua1_UXPwlslR5E8yGvjOk',
   authDomain:        'pfi-ifungi.firebaseapp.com',
   databaseURL:       'https://pfi-ifungi-default-rtdb.firebaseio.com',
   projectId:         'pfi-ifungi',
   storageBucket:     'pfi-ifungi.firebasestorage.app',
   messagingSenderId: '94721839071',
-  appId:             '1:94721839071:web:b36772e162aa8a2264fe6a',
-}
+  appId:             '1:94721839071:web:b36772e162aa8a2264fe6a'
+};
 
-// ════════════════════════════════════════════════════════
-// INIT FIREBASE
-// ════════════════════════════════════════════════════════
-firebase.initializeApp(FB_CONFIG)
-const auth = firebase.auth()
-const db   = firebase.database()
+firebase.initializeApp(FB_CONFIG);
+var auth = firebase.auth();
+var db   = firebase.database();
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // UTILS
-// ════════════════════════════════════════════════════════
-let _toastTimer
-function toast(msg, type='ok'){
-  const t=document.getElementById('toast')
-  t.textContent=msg; t.className='show '+(type==='err'?'err':'ok')
-  clearTimeout(_toastTimer)
-  _toastTimer=setTimeout(()=>t.className='',2500)
+// ═══════════════════════════════════════════════
+var _toastT;
+function toast(msg, type) {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'tshow ' + (type === 'err' ? 'terr' : 'tok');
+  clearTimeout(_toastT);
+  _toastT = setTimeout(function(){ t.className = ''; }, 2600);
 }
 
-function show(id){document.getElementById(id).classList.remove('section-hidden')}
-function hide(id){document.getElementById(id).classList.add('section-hidden')}
-function setText(id,v){const e=document.getElementById(id);if(e)e.textContent=v}
-function val(id){return document.getElementById(id).value}
-function checked(id){return document.getElementById(id).checked}
-function setChecked(id,v){document.getElementById(id).checked=!!v}
-function setVal(id,v){document.getElementById(id).value=v}
+function show(id){ var e=document.getElementById(id); if(e) e.classList.remove('hidden'); }
+function hide(id){ var e=document.getElementById(id); if(e) e.classList.add('hidden'); }
+function gv(id){ return document.getElementById(id).value; }
+function gc(id){ return document.getElementById(id).checked; }
+function sv(id,v){ var e=document.getElementById(id); if(e) e.value=v; }
+function sc(id,v){ var e=document.getElementById(id); if(e) e.checked=!!v; }
+function st(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
 
-function clampF(v,mn,mx,fb){const n=parseFloat(v);return isFinite(n)?Math.min(mx,Math.max(mn,n)):fb}
-function clampI(v,mn,mx,fb){const n=parseInt(v);return isFinite(n)?Math.min(mx,Math.max(mn,Math.round(n))):fb}
+function clampF(v,mn,mx,fb){ var n=parseFloat(v); return isFinite(n)?Math.min(mx,Math.max(mn,n)):fb; }
+function clampI(v,mn,mx,fb){ var n=parseInt(v,10); return isFinite(n)?Math.min(mx,Math.max(mn,Math.round(n))):fb; }
 
-function timeAgo(ts){
-  if(!ts) return '—'
-  const d=Math.floor(Date.now()/1000)-ts
-  if(d<60)   return `${d}s atrás`
-  if(d<3600) return `${Math.floor(d/60)}min atrás`
-  return `${Math.floor(d/3600)}h atrás`
+function timeAgo(ts) {
+  if(!ts) return '--';
+  var d = Math.floor(Date.now()/1000) - ts;
+  if(d<60)   return d+'s atras';
+  if(d<3600) return Math.floor(d/60)+'min atras';
+  return Math.floor(d/3600)+'h atras';
 }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════════
-let state = {
-  uid: null,
-  ghId: null,
-  data: {},
-  debugDirty: false,
-  spDirty: false,
-  ledDirty: false,
-  unsubs: [],
-}
+// ═══════════════════════════════════════════════
+var S = { uid:null, ghId:null, data:{}, spDirty:false, ledDirty:false, dbgDirty:false, unsubs:[] };
 
-function unsub(){ state.unsubs.forEach(f=>f()); state.unsubs=[] }
+function unsub(){ S.unsubs.forEach(function(f){ try{f();}catch(e){} }); S.unsubs=[]; }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // AUTH
-// ════════════════════════════════════════════════════════
-auth.onAuthStateChanged(user=>{
+// ═══════════════════════════════════════════════
+auth.onAuthStateChanged(function(user){
+  st('login-loading','');
   if(user){
-    state.uid=user.uid
-    hide('login-screen')
-    show('app')
-    loadGreenhouses()
+    S.uid = user.uid;
+    document.getElementById('login-screen').style.display = 'none';
+    var app = document.getElementById('app');
+    app.style.display = '-webkit-flex';
+    app.style.display = 'flex';
+    loadGreenhouses();
   } else {
-    state.uid=null
-    hide('app')
-    show('login-screen')
+    S.uid = null;
+    document.getElementById('login-screen').style.display = '-webkit-flex';
+    document.getElementById('login-screen').style.display = 'flex';
+    document.getElementById('app').style.display = 'none';
+    unsub();
   }
-})
+});
 
-document.getElementById('btn-login').onclick=async()=>{
-  const e=document.getElementById('inp-email').value.trim()
-  const p=document.getElementById('inp-pass').value
-  document.getElementById('login-err').textContent=''
-  try{
-    await auth.signInWithEmailAndPassword(e,p)
-  } catch(err){
-    document.getElementById('login-err').textContent='Credenciais inválidas'
-  }
-}
-
-document.getElementById('btn-logout').onclick=()=>auth.signOut()
-
-// Enter key on login
-document.getElementById('inp-pass').addEventListener('keydown',e=>{
-  if(e.key==='Enter') document.getElementById('btn-login').click()
-})
-
-// ════════════════════════════════════════════════════════
-// GREENHOUSES LIST
-// ════════════════════════════════════════════════════════
-function loadGreenhouses(){
-  db.ref(`/Usuarios/${state.uid}/Estufas permitidas`).on('value',snap=>{
-    const raw=snap.val()
-    let list=[]
-    if(Array.isArray(raw)) list=raw.filter(v=>typeof v==='string'&&v.length>0)
-    else if(typeof raw==='string' && raw.length>0) list=[raw]
-    else if(raw && typeof raw==='object') list=Object.values(raw).filter(v=>typeof v==='string'&&v.length>0)
-
-    const sel=document.getElementById('sel-greenhouse')
-    sel.innerHTML=''
-    if(!list.length){
-      sel.innerHTML='<option value="">Nenhuma estufa disponível</option>'
-      return
-    }
-    list.forEach(id=>{
-      const o=document.createElement('option')
-      o.value=id; o.textContent=id
-      sel.appendChild(o)
+document.getElementById('btn-login').onclick = function(){
+  var email = document.getElementById('inp-email').value.trim();
+  var pass  = document.getElementById('inp-pass').value;
+  st('login-err','');
+  st('login-loading','Entrando...');
+  document.getElementById('btn-login').disabled = true;
+  auth.signInWithEmailAndPassword(email, pass)
+    .then(function(){
+      st('login-loading','');
+      document.getElementById('btn-login').disabled = false;
     })
-    if(!state.ghId || !list.includes(state.ghId)){
-      selectGreenhouse(list[0])
+    .catch(function(err){
+      st('login-loading','');
+      st('login-err', 'Erro: ' + (err.message || 'credenciais invalidas'));
+      document.getElementById('btn-login').disabled = false;
+    });
+};
+
+document.getElementById('inp-pass').addEventListener('keydown', function(e){
+  if(e.keyCode===13 || e.key==='Enter') document.getElementById('btn-login').click();
+});
+
+document.getElementById('btn-logout').onclick = function(){ auth.signOut(); };
+
+// ═══════════════════════════════════════════════
+// GREENHOUSES
+// ═══════════════════════════════════════════════
+function loadGreenhouses(){
+  db.ref('/Usuarios/'+S.uid+'/Estufas permitidas').on('value', function(snap){
+    var raw = snap.val();
+    var list = [];
+    if(Array.isArray(raw)) list = raw.filter(function(v){ return typeof v==='string'&&v.length>0; });
+    else if(typeof raw==='string'&&raw.length>0) list=[raw];
+    else if(raw&&typeof raw==='object') list=Object.keys(raw).map(function(k){ return raw[k]; }).filter(function(v){ return typeof v==='string'&&v.length>0; });
+
+    var sel = document.getElementById('sel-gh');
+    sel.innerHTML = '';
+    if(!list.length){
+      sel.innerHTML = '<option value="">Nenhuma estufa disponivel</option>';
+      return;
     }
-  })
+    list.forEach(function(id){
+      var o = document.createElement('option');
+      o.value = id; o.textContent = id;
+      sel.appendChild(o);
+    });
+    if(!S.ghId || list.indexOf(S.ghId)===-1) selectGH(list[0]);
+  });
 }
 
-document.getElementById('sel-greenhouse').onchange=e=>selectGreenhouse(e.target.value)
+document.getElementById('sel-gh').onchange = function(){ selectGH(this.value); };
 
-function selectGreenhouse(id){
-  if(!id) return
-  state.ghId=id
-  unsub()
-  hide('dashboard')
-  show('loader')
+function selectGH(id){
+  if(!id) return;
+  S.ghId = id;
+  unsub();
+  hide('dashboard'); show('loader');
 
-  // subscribe snapshot
-  const u1 = db.ref(`/greenhouses/${id}`).on('value',snap=>{
-    hide('loader')
-    show('dashboard')
-    const raw=snap.val()||{}
-    state.data=raw
-    renderAll(raw)
-  })
-  state.unsubs.push(()=>db.ref(`/greenhouses/${id}`).off('value',u1))
+  var ref1 = db.ref('/greenhouses/'+id);
+  var cb1 = ref1.on('value', function(snap){
+    hide('loader'); show('dashboard');
+    S.data = snap.val() || {};
+    renderAll(S.data);
+  });
+  S.unsubs.push(function(){ ref1.off('value', cb1); });
 
-  // connection state
-  const u2 = db.ref('.info/connected').on('value',snap=>{
-    if(snap.val()) hide('no-conn')
-    else show('no-conn')
-  })
-  state.unsubs.push(()=>db.ref('.info/connected').off('value',u2))
+  var ref2 = db.ref('.info/connected');
+  var cb2 = ref2.on('value', function(snap){
+    if(snap.val()) hide('no-conn'); else show('no-conn');
+  });
+  S.unsubs.push(function(){ ref2.off('value', cb2); });
 }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // RENDER
-// ════════════════════════════════════════════════════════
-const SENSOR_MAP=[
-  {key:'temperatura',label:'Temp.',unit:'°C',sk:'dht22',fmt:v=>v!=null?v.toFixed(1):'—',warn:(v,sp)=>v!=null&&sp&&(v<sp.tMin-2||v>sp.tMax+2)},
-  {key:'umidade',label:'Umidade',unit:'%',sk:'dht22',fmt:v=>v!=null?v.toFixed(1):'—',warn:(v,sp)=>v!=null&&sp&&(v<sp.uMin-5||v>sp.uMax+5)},
-  {key:'co2',label:'CO₂',unit:'ppm',sk:'ccs811',fmt:v=>v!=null?v:'—',warn:(v,sp)=>v!=null&&sp&&v>sp.co2Sp},
-  {key:'co',label:'CO',unit:'ppm',sk:'mq07',fmt:v=>v!=null?v:'—',warn:(v,sp)=>v!=null&&sp&&v>sp.coSp},
-  {key:'luminosidade',label:'Luz',unit:'lux',sk:'ldr',fmt:v=>v!=null?v:'—',warn:()=>false},
-  {key:'tvocs',label:'TVOCs',unit:'ppb',sk:'ccs811',fmt:v=>v!=null?v:'—',warn:(v,sp)=>v!=null&&sp&&v>sp.tvocsSp},
-]
+// ═══════════════════════════════════════════════
+var SENSOR_MAP = [
+  {key:'temperatura', label:'Temp.',    unit:'C',   sk:'dht22',  fmt:function(v){return v!=null?parseFloat(v).toFixed(1):'--';}, warn:function(v,sp){return v!=null&&sp&&(v<sp.tMin-2||v>sp.tMax+2);}},
+  {key:'umidade',     label:'Umidade',  unit:'%',   sk:'dht22',  fmt:function(v){return v!=null?parseFloat(v).toFixed(1):'--';}, warn:function(v,sp){return v!=null&&sp&&(v<sp.uMin-5||v>sp.uMax+5);}},
+  {key:'co2',         label:'CO2',      unit:'ppm', sk:'ccs811', fmt:function(v){return v!=null?v:'--';}, warn:function(v,sp){return v!=null&&sp&&v>sp.co2Sp;}},
+  {key:'co',          label:'CO',       unit:'ppm', sk:'mq07',   fmt:function(v){return v!=null?v:'--';}, warn:function(v,sp){return v!=null&&sp&&v>sp.coSp;}},
+  {key:'luminosidade',label:'Luz',      unit:'lux', sk:'ldr',    fmt:function(v){return v!=null?v:'--';}, warn:function(){return false;}},
+  {key:'tvocs',       label:'TVOCs',    unit:'ppb', sk:'ccs811', fmt:function(v){return v!=null?v:'--';}, warn:function(v,sp){return v!=null&&sp&&v>sp.tvocsSp;}}
+];
 
-const MODES=[
-  {id:'manual',label:'Manual',desc:'Setpoints controlados pelo app.'},
-  {id:'incubacao',label:'Incubação',desc:'Escuro, seco, temp. controlada 22–28°C.'},
-  {id:'frutificacao',label:'Frutificação',desc:'Alta umidade 85–95%, ciclo de luz 12h.'},
-  {id:'secagem',label:'Secagem',desc:'Umidade baixa, exaustor contínuo, LEDs off.'},
-  {id:'manutencao',label:'Manutenção',desc:'Todos os atuadores desligados.'},
-]
+var MODES = [
+  {id:'manual',       label:'Manual',       desc:'Setpoints controlados pelo app.'},
+  {id:'incubacao',    label:'Incubacao',    desc:'Escuro, seco, temperatura 22-28C.'},
+  {id:'frutificacao', label:'Frutificacao', desc:'Alta umidade 85-95%, luz 12h/dia.'},
+  {id:'secagem',      label:'Secagem',      desc:'Umidade baixa, exaustor continuo.'},
+  {id:'manutencao',   label:'Manutencao',   desc:'Todos os atuadores desligados.'}
+];
 
 function renderAll(raw){
-  renderStatus(raw.status||{}, raw.sensor_status||{})
-  renderSensors(raw.sensores||{}, raw.sensor_status||{}, raw.setpoints||{}, raw.atuadores||{}, raw.niveis||{})
-  renderActuators(raw.atuadores||{})
-  renderMode(raw.operation_mode||{})
-  renderDebug(!!raw.debug_mode, raw.manual_actuators||{})
-  renderSetpoints(raw.setpoints||{})
-  renderLed(raw.led_schedule||{})
+  renderStatus(raw.status||{}, raw.sensor_status||{});
+  renderSensors(raw.sensores||{}, raw.sensor_status||{}, raw.setpoints||{}, raw.atuadores||{}, raw.niveis||{});
+  renderActuators(raw.atuadores||{});
+  renderMode(raw.operation_mode||{});
+  renderDebug(!!raw.debug_mode, raw.manual_actuators||{});
+  renderSetpoints(raw.setpoints||{});
+  renderLed(raw.led_schedule||{});
 }
 
 function renderStatus(st, ss){
-  const online=!!st.online
-  const sensorErrs=Object.entries({dht22:'DHT22',ccs811:'CCS811',mq07:'MQ-7',ldr:'LDR',waterlevel:'Água'})
-    .filter(([k])=>ss[k]&&ss[k].toUpperCase()!=='OK')
-
-  let html=`<span class="pill ${online?'online':'offline'}"><span class="dot"></span>${online?'Online':'Offline'}</span>`
-  if(st.ip) html+=` <span class="pill">${st.ip}</span>`
-  if(st.lastHeartbeat) html+=` <span class="pill">${timeAgo(st.lastHeartbeat)}</span>`
-  if(sensorErrs.length===0){
-    html+=` <span class="pill" style="color:var(--green);border-color:var(--green)">✓ Sensores OK</span>`
-  } else {
-    sensorErrs.forEach(([,n])=>{ html+=` <span class="pill" style="color:var(--red);border-color:var(--red)">✗ ${n}</span>` })
-  }
-  document.getElementById('status-bar').innerHTML=html
+  var online = !!st.online;
+  var html = '<span class="pill '+(online?'pill-on':'pill-off')+'"><span class="dot"></span>'+(online?'Online':'Offline')+'</span>';
+  if(st.ip) html += ' <span class="pill">'+st.ip+'</span>';
+  if(st.lastHeartbeat) html += ' <span class="pill">'+timeAgo(st.lastHeartbeat)+'</span>';
+  var errs = [];
+  var names = {dht22:'DHT22',ccs811:'CCS811',mq07:'MQ-7',ldr:'LDR',waterlevel:'Agua'};
+  for(var k in names){ if(ss[k]&&ss[k].toUpperCase()!=='OK') errs.push(names[k]); }
+  if(!errs.length) html += ' <span class="pill pill-on">Sensores OK</span>';
+  else errs.forEach(function(n){ html += ' <span class="pill pill-off">Erro: '+n+'</span>'; });
+  document.getElementById('status-bar').innerHTML = html;
 }
 
 function renderSensors(s, ss, sp, at, niv){
-  let html=''
-  SENSOR_MAP.forEach(({key,label,unit,sk,fmt,warn})=>{
-    const v=s[key]
-    const healthy=!ss[sk]||ss[sk].toUpperCase()==='OK'
-    const isWarn=warn(v,sp)
-    let cls='s-card'; if(!healthy) cls+=' err'; else if(isWarn) cls+=' warn'
-    let badge=''; if(!healthy) badge='<span class="s-badge err">✗ ERRO</span>'; else if(isWarn) badge='<span class="s-badge warn">▲ Setpoint</span>'; else badge='<span class="s-badge ok">✓ OK</span>'
-    html+=`<div class="${cls}"><div class="s-label">${label}</div><div class="s-val">${healthy?fmt(v):'N/A'}<span class="s-unit">${healthy&&v!=null?unit:''}</span></div>${badge}</div>`
-  })
+  var html = '';
+  SENSOR_MAP.forEach(function(m){
+    var v = s[m.key];
+    var healthy = !ss[m.sk] || ss[m.sk].toUpperCase()==='OK';
+    var isWarn  = m.warn(v, sp);
+    var cls = 's-card' + (!healthy?' s-card-err':(isWarn?' s-card-warn':''));
+    var badge = !healthy
+      ? '<div class="s-badge badge-err">ERRO</div>'
+      : isWarn
+        ? '<div class="s-badge badge-warn">^ SETPOINT</div>'
+        : '<div class="s-badge badge-ok">OK</div>';
+    var valHtml = healthy ? (m.fmt(v)+(v!=null?'<span class="s-unit">'+m.unit+'</span>':'')) : 'N/A';
+    html += '<div class="'+cls+'"><div class="s-label">'+m.label+'</div><div class="s-val">'+valHtml+'</div>'+badge+'</div>';
+  });
   // Reservatório
-  const agua=!!niv?.agua
-  html+=`<div class="s-card${agua?' warn':''}"><div class="s-label">Reserv.</div><div class="s-val" style="font-size:16px">${agua?'BAIXA':'OK'}</div><span class="s-badge ${agua?'warn':'ok'}">${agua?'▲ Baixo':'✓ OK'}</span></div>`
+  var agua = !!(niv&&niv.agua);
+  html += '<div class="s-card'+(agua?' s-card-warn':'')+'"><div class="s-label">Reserv.</div><div class="s-val" style="font-size:16px">'+(agua?'BAIXA':'OK')+'</div><div class="s-badge '+(agua?'badge-warn':'badge-ok')+'">'+(agua?'BAIXO':'OK')+'</div></div>';
   // LEDs
-  const ledon=!!at?.leds?.ligado
-  html+=`<div class="s-card"><div class="s-label">LEDs</div><div class="s-val" style="font-size:16px">${ledon?`${at.leds.watts||0}/255`:'OFF'}</div><span class="s-badge ${ledon?'ok':''}"> ${ledon?'Ligado':'Desligado'}</span></div>`
-  document.getElementById('sensor-grid').innerHTML=html
+  var ledon = !!(at&&at.leds&&at.leds.ligado);
+  html += '<div class="s-card"><div class="s-label">LEDs</div><div class="s-val" style="font-size:16px">'+(ledon?(at.leds.watts||0)+'/255':'OFF')+'</div><div class="s-badge '+(ledon?'badge-ok':'')+'">'+(ledon?'Ligado':'Desligado')+'</div></div>';
+  document.getElementById('sensor-grid').innerHTML = html;
 }
 
 function renderActuators(at){
-  const defs=[
-    {k:'rele1',l:'Relé 1'},
-    {k:'rele2',l:'Relé 2'},
-    {k:'rele3',l:'Relé 3'},
-    {k:'rele4',l:'Relé 4'},
-    {k:'umidificador',l:'Umid.'},
-  ]
-  let html=''
-  defs.forEach(({k,l})=>{
-    const on=!!at[k]
-    html+=`<span class="act-pill${on?' on':''}"><span class="dot"></span>${l}</span>`
-  })
-  const ledon=!!at?.leds?.ligado
-  html+=`<span class="act-pill${ledon?' on':''}"><span class="dot"></span>LEDs${ledon?` (${at.leds.watts||0}/255)`:''}</span>`
-  document.getElementById('actuator-row').innerHTML=html
+  var defs = [{k:'rele1',l:'Rele 1'},{k:'rele2',l:'Rele 2'},{k:'rele3',l:'Rele 3'},{k:'rele4',l:'Rele 4'},{k:'umidificador',l:'Umid.'}];
+  var html = '';
+  defs.forEach(function(d){
+    var on = !!at[d.k];
+    html += '<span class="act-pill'+(on?' act-on':'')+'"><span class="dot"></span>'+d.l+'</span>';
+  });
+  var ledon = !!(at&&at.leds&&at.leds.ligado);
+  html += '<span class="act-pill'+(ledon?' act-on':'')+'"><span class="dot"></span>LEDs'+(ledon?' ('+at.leds.watts+'/255)':'')+'</span>';
+  document.getElementById('actuator-row').innerHTML = html;
 }
 
 function renderMode(om){
-  const cur=om?.mode||'manual'
-  let html=''
-  MODES.forEach(({id,label})=>{
-    html+=`<button class="mode-btn${id===cur?' active':''}" data-mode="${id}">${label}</button>`
-  })
-  const mg=document.getElementById('mode-grid')
-  mg.innerHTML=html
-  mg.querySelectorAll('.mode-btn').forEach(btn=>{
-    btn.onclick=()=>applyMode(btn.dataset.mode)
-  })
-  const mh=document.getElementById('mode-hint')
-  mh.textContent=(MODES.find(m=>m.id===cur)||MODES[0]).desc
+  var cur = (om&&om.mode)||'manual';
+  var html = '';
+  MODES.forEach(function(m){
+    html += '<button class="mode-btn'+(m.id===cur?' mode-btn-active':'')+'" data-mode="'+m.id+'">'+m.label+'</button>';
+  });
+  var mg = document.getElementById('mode-grid');
+  mg.innerHTML = html;
+  var btns = mg.querySelectorAll('.mode-btn');
+  for(var i=0;i<btns.length;i++){
+    btns[i].onclick = (function(btn){ return function(){ applyMode(btn.getAttribute('data-mode')); }; })(btns[i]);
+  }
+  var mobj = null;
+  MODES.forEach(function(m){ if(m.id===cur) mobj=m; });
+  st('mode-hint', mobj?mobj.desc:'');
 }
 
 function renderDebug(debugMode, ma){
-  const btn=document.getElementById('btn-debug')
-  const panel=document.getElementById('manual-panel')
+  var btn = document.getElementById('btn-debug');
+  var panel = document.getElementById('manual-panel');
   if(debugMode){
-    btn.textContent='Manual ativo'; btn.classList.add('active')
-    panel.classList.add('visible')
+    btn.textContent='Manual ativo'; btn.classList.add('dbg-active');
+    panel.classList.add('mpvis');
   } else {
-    btn.textContent='Automático'; btn.classList.remove('active')
-    panel.classList.remove('visible')
+    btn.textContent='Automatico'; btn.classList.remove('dbg-active');
+    panel.classList.remove('mpvis');
   }
-  // Populate checkboxes only if not dirty
-  if(!state.debugDirty){
-    setChecked('m-r1',!!ma.rele1)
-    setChecked('m-r2',!!ma.rele2)
-    setChecked('m-r3',!!ma.rele3)
-    setChecked('m-r4',!!ma.rele4)
-    setChecked('m-um',!!ma.umidificador)
-    setChecked('m-led',!!ma?.leds?.ligado)
-    setVal('m-led-int',ma?.leds?.intensity??255)
-    setText('led-int-val',ma?.leds?.intensity??255)
-    if(ma?.leds?.ligado) show('led-intensity-row'); else hide('led-intensity-row')
+  if(!S.dbgDirty){
+    sc('m-r1',ma.rele1); sc('m-r2',ma.rele2); sc('m-r3',ma.rele3); sc('m-r4',ma.rele4);
+    sc('m-um',ma.umidificador); sc('m-led',ma.leds&&ma.leds.ligado);
+    sv('m-led-int',(ma.leds&&ma.leds.intensity!=null)?ma.leds.intensity:255);
+    st('led-int-val',(ma.leds&&ma.leds.intensity!=null)?ma.leds.intensity:255);
+    if(ma.leds&&ma.leds.ligado) document.getElementById('led-intensity-row').classList.add('livis');
+    else document.getElementById('led-intensity-row').classList.remove('livis');
   }
 }
 
 function renderSetpoints(sp){
-  if(!state.spDirty){
-    setVal('sp-tMin',sp.tMin??20); setVal('sp-tMax',sp.tMax??30)
-    setVal('sp-uMin',sp.uMin??60); setVal('sp-uMax',sp.uMax??80)
-    setVal('sp-co2Sp',sp.co2Sp??1000); setVal('sp-coSp',sp.coSp??50)
-    setVal('sp-tvocsSp',sp.tvocsSp??100); setVal('sp-lux',sp.lux??5000)
+  if(!S.spDirty){
+    sv('sp-tMin',sp.tMin!=null?sp.tMin:20);   sv('sp-tMax',sp.tMax!=null?sp.tMax:30);
+    sv('sp-uMin',sp.uMin!=null?sp.uMin:60);   sv('sp-uMax',sp.uMax!=null?sp.uMax:80);
+    sv('sp-co2Sp',sp.co2Sp!=null?sp.co2Sp:1000); sv('sp-coSp',sp.coSp!=null?sp.coSp:50);
+    sv('sp-tvocsSp',sp.tvocsSp!=null?sp.tvocsSp:100); sv('sp-lux',sp.lux!=null?sp.lux:5000);
   }
 }
 
 function renderLed(ls){
-  if(!state.ledDirty){
-    setChecked('led-sched',!!ls.scheduleEnabled)
-    setChecked('led-solar',!!ls.solarSimEnabled)
-    setVal('led-onH',ls.onHour??6); setVal('led-onM',ls.onMinute??0)
-    setVal('led-offH',ls.offHour??20); setVal('led-offM',ls.offMinute??0)
-    setVal('led-sched-int',ls.intensity??255)
-    setText('led-sched-int-val',ls.intensity??255)
-    updateLedIntRow()
+  if(!S.ledDirty){
+    sc('led-sched',!!ls.scheduleEnabled); sc('led-solar',!!ls.solarSimEnabled);
+    sv('led-onH',ls.onHour!=null?ls.onHour:6);    sv('led-onM',ls.onMinute!=null?ls.onMinute:0);
+    sv('led-offH',ls.offHour!=null?ls.offHour:20); sv('led-offM',ls.offMinute!=null?ls.offMinute:0);
+    sv('led-sched-int',ls.intensity!=null?ls.intensity:255);
+    st('led-sched-int-val',ls.intensity!=null?ls.intensity:255);
+    updateLedIntRow();
   }
 }
 
 function updateLedIntRow(){
-  const s=checked('led-sched')&&!checked('led-solar')
-  if(s) show('led-int-sched-row'); else hide('led-int-sched-row')
+  var show = gc('led-sched') && !gc('led-solar');
+  var el = document.getElementById('led-int-sched-row');
+  if(show) el.classList.add('livis'); else el.classList.remove('livis');
 }
 
-// ════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════
 // ACTIONS
-// ════════════════════════════════════════════════════════
-async function applyMode(modeId){
-  if(!state.ghId) return
-  if(modeId===(state.data?.operation_mode?.mode||'manual')) return
-  try{
-    await db.ref(`/greenhouses/${state.ghId}/operation_mode`).update({
-      mode:modeId,
-      lastChanged:Math.floor(Date.now()/1000),
-      changedBy:'app'
-    })
-    toast(`Modo "${MODES.find(m=>m.id===modeId)?.label}" aplicado`)
-  } catch(e){ toast('Erro: '+e.message,'err') }
+// ═══════════════════════════════════════════════
+function applyMode(modeId){
+  if(!S.ghId) return;
+  if(modeId===((S.data.operation_mode&&S.data.operation_mode.mode)||'manual')) return;
+  var label=''; MODES.forEach(function(m){ if(m.id===modeId) label=m.label; });
+  db.ref('/greenhouses/'+S.ghId+'/operation_mode').update({
+    mode:modeId, lastChanged:Math.floor(Date.now()/1000), changedBy:'app'
+  }).then(function(){ toast('Modo "'+label+'" aplicado'); })
+    .catch(function(e){ toast('Erro: '+e.message,'err'); });
 }
 
-document.getElementById('btn-debug').onclick=async()=>{
-  if(!state.ghId) return
-  const d=!!state.data?.debug_mode
-  try{
-    await db.ref(`/greenhouses/${state.ghId}/debug_mode`).set(!d)
-    toast(d?'Modo automático ativado':'Modo manual ativado')
-  } catch(e){ toast('Erro: '+e.message,'err') }
-}
+document.getElementById('btn-debug').onclick = function(){
+  if(!S.ghId) return;
+  var d = !!S.data.debug_mode;
+  db.ref('/greenhouses/'+S.ghId+'/debug_mode').set(!d)
+    .then(function(){ toast(d?'Automatico ativado':'Manual ativado'); })
+    .catch(function(e){ toast('Erro: '+e.message,'err'); });
+};
 
-// Manual controls dirty tracking
-;['m-r1','m-r2','m-r3','m-r4','m-um','m-led','m-led-int'].forEach(id=>{
-  const el=document.getElementById(id)
-  if(el) el.addEventListener('change',()=>state.debugDirty=true)
-  if(el) el.addEventListener('input',()=>state.debugDirty=true)
-})
-document.getElementById('m-led').onchange=e=>{
-  if(e.target.checked) show('led-intensity-row'); else hide('led-intensity-row')
-  state.debugDirty=true
-}
-document.getElementById('m-led-int').oninput=e=>setText('led-int-val',e.target.value)
+// Manual dirty
+['m-r1','m-r2','m-r3','m-r4','m-um','m-led','m-led-int'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el){ el.addEventListener('change',function(){ S.dbgDirty=true; }); el.addEventListener('input',function(){ S.dbgDirty=true; }); }
+});
+document.getElementById('m-led').onchange = function(){
+  S.dbgDirty=true;
+  if(this.checked) document.getElementById('led-intensity-row').classList.add('livis');
+  else document.getElementById('led-intensity-row').classList.remove('livis');
+};
+document.getElementById('m-led-int').oninput = function(){ st('led-int-val',this.value); };
 
-document.getElementById('btn-apply-manual').onclick=async()=>{
-  if(!state.ghId) return
-  const btn=document.getElementById('btn-apply-manual')
-  btn.disabled=true; btn.textContent='Enviando...'
-  const payload={
-    rele1:checked('m-r1'), rele2:checked('m-r2'),
-    rele3:checked('m-r3'), rele4:checked('m-r4'),
-    umidificador:checked('m-um'),
-    leds:{ligado:checked('m-led'), intensity:parseInt(val('m-led-int'))||0}
-  }
-  try{
-    await db.ref(`/greenhouses/${state.ghId}/manual_actuators`).set(payload)
-    toast('Atuadores manuais enviados')
-    state.debugDirty=false
-  } catch(e){ toast('Erro: '+e.message,'err') }
-  btn.disabled=false; btn.textContent='Aplicar atuadores'
-}
+document.getElementById('btn-apply-manual').onclick = function(){
+  if(!S.ghId) return;
+  var btn=this; btn.disabled=true; btn.textContent='Enviando...';
+  var payload={
+    rele1:gc('m-r1'),rele2:gc('m-r2'),rele3:gc('m-r3'),rele4:gc('m-r4'),
+    umidificador:gc('m-um'),
+    leds:{ligado:gc('m-led'),intensity:parseInt(gv('m-led-int'),10)||0}
+  };
+  db.ref('/greenhouses/'+S.ghId+'/manual_actuators').set(payload)
+    .then(function(){ toast('Atuadores enviados'); S.dbgDirty=false; })
+    .catch(function(e){ toast('Erro: '+e.message,'err'); })
+    .then(function(){ btn.disabled=false; btn.textContent='Aplicar atuadores'; });
+};
 
-// Setpoints dirty tracking
-;['sp-tMin','sp-tMax','sp-uMin','sp-uMax','sp-co2Sp','sp-coSp','sp-tvocsSp','sp-lux'].forEach(id=>{
-  document.getElementById(id).oninput=()=>{
-    state.spDirty=true
-    const btn=document.getElementById('btn-save-sp')
-    btn.disabled=false; btn.classList.add('dirty'); btn.textContent='Salvar setpoints'
-  }
-})
+// Setpoints dirty
+['sp-tMin','sp-tMax','sp-uMin','sp-uMax','sp-co2Sp','sp-coSp','sp-tvocsSp','sp-lux'].forEach(function(id){
+  document.getElementById(id).oninput=function(){
+    S.spDirty=true;
+    var btn=document.getElementById('btn-save-sp');
+    btn.disabled=false; btn.classList.add('dirty'); btn.textContent='Salvar setpoints';
+  };
+});
 
-document.getElementById('btn-save-sp').onclick=async()=>{
-  if(!state.ghId) return
-  const tMin=clampF(val('sp-tMin'),0,40,20)
-  const tMax=clampF(val('sp-tMax'),0,50,30)
-  const uMin=clampF(val('sp-uMin'),0,100,60)
-  const uMax=clampF(val('sp-uMax'),0,100,80)
-  if(tMin>=tMax){ toast('Temp. mín deve ser menor que máx','err'); return }
-  if(uMin>=uMax){ toast('Umid. mín deve ser menor que máx','err'); return }
-  const payload={
-    tMin,tMax,uMin,uMax,
-    co2Sp:clampI(val('sp-co2Sp'),100,5000,1000),
-    coSp:clampI(val('sp-coSp'),0,500,50),
-    tvocsSp:clampI(val('sp-tvocsSp'),0,1000,100),
-    lux:clampI(val('sp-lux'),0,4095,5000),
-  }
-  const btn=document.getElementById('btn-save-sp')
-  btn.disabled=true; btn.textContent='Salvando...'
-  try{
-    await db.ref(`/greenhouses/${state.ghId}/setpoints`).update(payload)
-    toast('Setpoints salvos')
-    state.spDirty=false
-    btn.classList.remove('dirty'); btn.textContent='Setpoints salvos'
-    setTimeout(()=>{btn.textContent='Salvar setpoints'},2000)
-  } catch(e){ toast('Erro: '+e.message,'err'); btn.disabled=false }
-}
+document.getElementById('btn-save-sp').onclick = function(){
+  if(!S.ghId) return;
+  var tMin=clampF(gv('sp-tMin'),0,40,20), tMax=clampF(gv('sp-tMax'),0,50,30);
+  var uMin=clampF(gv('sp-uMin'),0,100,60), uMax=clampF(gv('sp-uMax'),0,100,80);
+  if(tMin>=tMax){ toast('Temp. min deve ser menor que max','err'); return; }
+  if(uMin>=uMax){ toast('Umid. min deve ser menor que max','err'); return; }
+  var btn=this; btn.disabled=true; btn.textContent='Salvando...';
+  var payload={tMin:tMin,tMax:tMax,uMin:uMin,uMax:uMax,
+    co2Sp:clampI(gv('sp-co2Sp'),100,5000,1000),
+    coSp:clampI(gv('sp-coSp'),0,500,50),
+    tvocsSp:clampI(gv('sp-tvocsSp'),0,1000,100),
+    lux:clampI(gv('sp-lux'),0,4095,5000)};
+  db.ref('/greenhouses/'+S.ghId+'/setpoints').update(payload)
+    .then(function(){ toast('Setpoints salvos'); S.spDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar setpoints'; },2000); })
+    .catch(function(e){ toast('Erro: '+e.message,'err'); btn.disabled=false; btn.textContent='Salvar setpoints'; });
+};
 
-// LED schedule dirty tracking
-;['led-sched','led-solar','led-onH','led-onM','led-offH','led-offM','led-sched-int'].forEach(id=>{
-  const el=document.getElementById(id)
+// LED dirty
+['led-sched','led-solar','led-onH','led-onM','led-offH','led-offM','led-sched-int'].forEach(function(id){
+  var el=document.getElementById(id);
   if(el){
-    el.addEventListener('change',()=>{ state.ledDirty=true; markLedDirty() })
-    el.addEventListener('input',()=>{ state.ledDirty=true; markLedDirty() })
+    el.addEventListener('change',function(){ S.ledDirty=true; markLedDirty(); });
+    el.addEventListener('input',function(){ S.ledDirty=true; markLedDirty(); });
   }
-})
-document.getElementById('led-sched').onchange=()=>{ updateLedIntRow(); state.ledDirty=true; markLedDirty() }
-document.getElementById('led-solar').onchange=()=>{ updateLedIntRow(); state.ledDirty=true; markLedDirty() }
-document.getElementById('led-sched-int').oninput=e=>setText('led-sched-int-val',e.target.value)
+});
+document.getElementById('led-sched').onchange=function(){ updateLedIntRow(); S.ledDirty=true; markLedDirty(); };
+document.getElementById('led-solar').onchange=function(){ updateLedIntRow(); S.ledDirty=true; markLedDirty(); };
+document.getElementById('led-sched-int').oninput=function(){ st('led-sched-int-val',this.value); };
 
 function markLedDirty(){
-  const btn=document.getElementById('btn-save-led')
-  btn.disabled=false; btn.classList.add('dirty'); btn.textContent='Salvar agendamento'
+  var btn=document.getElementById('btn-save-led');
+  btn.disabled=false; btn.classList.add('dirty'); btn.textContent='Salvar agendamento';
 }
 
-document.getElementById('btn-save-led').onclick=async()=>{
-  if(!state.ghId) return
-  const onH=clampI(val('led-onH'),0,23,6), onM=clampI(val('led-onM'),0,59,0)
-  const offH=clampI(val('led-offH'),0,23,20), offM=clampI(val('led-offM'),0,59,0)
-  if(offH*60+offM<=onH*60+onM){ toast('Horário de fim deve ser depois do início','err'); return }
-  const payload={
-    scheduleEnabled:checked('led-sched'),
-    solarSimEnabled:checked('led-solar'),
-    onHour:onH, onMinute:onM,
-    offHour:offH, offMinute:offM,
-    intensity:clampI(val('led-sched-int'),0,255,255),
-  }
-  const btn=document.getElementById('btn-save-led')
-  btn.disabled=true; btn.textContent='Salvando...'
-  try{
-    await db.ref(`/greenhouses/${state.ghId}/led_schedule`).set(payload)
-    toast('Agendamento de LEDs salvo')
-    state.ledDirty=false
-    btn.classList.remove('dirty'); btn.textContent='Agendamento salvo'
-    setTimeout(()=>{btn.textContent='Salvar agendamento'},2000)
-  } catch(e){ toast('Erro: '+e.message,'err'); btn.disabled=false }
-}
+document.getElementById('btn-save-led').onclick = function(){
+  if(!S.ghId) return;
+  var onH=clampI(gv('led-onH'),0,23,6), onM=clampI(gv('led-onM'),0,59,0);
+  var offH=clampI(gv('led-offH'),0,23,20), offM=clampI(gv('led-offM'),0,59,0);
+  if(offH*60+offM<=onH*60+onM){ toast('Horario de fim deve ser depois do inicio','err'); return; }
+  var btn=this; btn.disabled=true; btn.textContent='Salvando...';
+  var payload={
+    scheduleEnabled:gc('led-sched'),solarSimEnabled:gc('led-solar'),
+    onHour:onH,onMinute:onM,offHour:offH,offMinute:offM,
+    intensity:clampI(gv('led-sched-int'),0,255,255)
+  };
+  db.ref('/greenhouses/'+S.ghId+'/led_schedule').set(payload)
+    .then(function(){ toast('Agendamento salvo'); S.ledDirty=false; btn.classList.remove('dirty'); btn.textContent='Salvo'; setTimeout(function(){ btn.textContent='Salvar agendamento'; },2000); })
+    .catch(function(e){ toast('Erro: '+e.message,'err'); btn.disabled=false; btn.textContent='Salvar agendamento'; });
+};
 </script>
 </body>
 </html>
